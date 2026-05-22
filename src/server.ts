@@ -1,10 +1,16 @@
 import app from "./app";
 import config from "./configaration";
+import { initDB } from "./db";
 
 const main = () => {
-  app.listen(config, () => {
-    console.log("server is running!");
-  });
+  try {
+    initDB();
+    app.listen(config, () => {
+    console.log(`server is running! on port ${config.port}`);
+    });
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 main();
