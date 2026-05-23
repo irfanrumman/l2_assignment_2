@@ -7,7 +7,10 @@ dotenv.config({
 
 const config = {
   port: process.env.PORT,
-  connection: process.env.CONNECTION_STRING
+  connection: process.env.CONNECTION_STRING,
+  secret: process.env.JWT_SECRET,
+  expTime: process.env.JWT_EXPIRESINTIME,
+  refresh_secrete: process.env.JWT_REFRESH_SECRET
 };
 
 export default config;
