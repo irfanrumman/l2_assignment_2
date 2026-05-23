@@ -3,8 +3,9 @@ import jwt, { type JwtPayload } from "jsonwebtoken";
 import config from "../configaration";
 import { pool } from "../db";
 import sendResponse from "../utils/sedResponse";
+import type { UserRole } from "./auth.intrface";
 
-const authMiddelWare = (...roles: any) => {
+const authMiddelWare = (...roles: UserRole[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const token = req.headers.authorization;
@@ -14,6 +15,7 @@ const authMiddelWare = (...roles: any) => {
           success: false,
           message: "Unauthorized Access!!",
         });
+        return;
       }
 
       //Decoded
@@ -37,6 +39,7 @@ const authMiddelWare = (...roles: any) => {
           success: false,
           message: "Unauthorized!",
         });
+        return;
       }
 
       if (!user.role) {
@@ -53,6 +56,7 @@ const authMiddelWare = (...roles: any) => {
           success: false,
           message: "Forbidden Access!",
         });
+        return;
       }
       req.user = decoded;
 

@@ -1,7 +1,7 @@
 import { pool } from "../../db";
-import type { IIssueQueryOptions } from "./issue.interface";
+import type { ICreateIssue, IIssueQueryOptions } from "./issue.interface";
 
-const createIssueToDB = async (payload: any) => {
+const createIssueToDB = async (payload: ICreateIssue) => {
   const { title, description, type, status, reporter_id } = payload;
 
   const user = await pool.query(
@@ -95,9 +95,7 @@ const getAllIssuesFromDB = async (payload: IIssueQueryOptions) => {
   return finalIssueFormat;
 };
 
-const getSingleIssueFromDB = async (payload: any) => {
-  const { id } = payload;
-
+const getSingleIssueFromDB = async (id: string) => {
   const issueData = await pool.query(
     `
     SELECT * FROM issues WHERE id=$1
@@ -195,21 +193,17 @@ const updateIssueIntoDB = async (
 
 const deleteIssueFromDB = async (id: string) => {
 
+  const checkIssue = await pool.query(`SELECT id FROM issues WHERE id = $1`, [
+    id,
+  ]);
+  if (checkIssue.rows.length === 0) {
+    throw new Error("Issue not found");
+  }
 
-   const issueResult = await pool.query(
-    `
-    DELETE FROM issues WHERE id = $1
-    RETURNING *
-    `,
-    [id],
+  await pool.query(
+    `DELETE FROM issues WHERE id = $1`,
+    [id]
   );
-  const result = issueResult.rows[0];
-
-   if (!result) {
-      throw new Error("Issue not found");
-    }
-
-  return result;
 };
 export const issueServiece = {
   createIssueToDB,

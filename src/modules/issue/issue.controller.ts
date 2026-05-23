@@ -58,7 +58,8 @@ const getALlIssues = async (req: Request, res: Response) => {
 
 const getSingleIssue = async (req: Request, res: Response) => {
   try {
-    const result = await issueServiece.getSingleIssueFromDB(req.params);
+    const { id } = req.params;
+    const result = await issueServiece.getSingleIssueFromDB(id as string);
 
     sendResponse(res, {
       statusCode: 200,
@@ -110,7 +111,7 @@ const updateIssue = async (req: Request, res: Response) => {
 const removeIssue = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const result = await issueServiece.deleteIssueFromDB(id as string);
+    await issueServiece.deleteIssueFromDB(id as string);
 
     sendResponse(res, {
       statusCode: 200,

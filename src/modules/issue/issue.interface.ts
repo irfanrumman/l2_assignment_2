@@ -7,3 +7,11 @@ export interface IIssueQueryOptions {
   type?: issueType;
   status?: issueStatus;
 }
+
+export interface ICreateIssue {
+  title: string;
+  description: string;
+  type: issueType;
+  status: issueStatus;
+  reporter_id: number;
+}
