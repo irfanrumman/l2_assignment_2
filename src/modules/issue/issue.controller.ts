@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { issueServiece } from "./issue.serviece";
+import type { IIssueQueryOptions } from "./issue.interface";
 
 const createIssue = async (req: Request, res: Response) => {
   try {
@@ -10,7 +11,6 @@ const createIssue = async (req: Request, res: Response) => {
       reporter_id,
     });
 
-   
     res.status(201).json({
       success: true,
       message: "Issue created successfully",
@@ -24,7 +24,28 @@ const createIssue = async (req: Request, res: Response) => {
     });
   }
 };
+interface IReq {
+  sort?: string;
+  type?: string;
+  status?: string;
+}
+const getALlIssues = async (req: Request, res: Response) => {
+  try {
+    const { sort, type, status } = req.query;
+    const result = await issueServiece.getAllIssuesFromDB({
+      sort,
+      type,
+      status,
+    } as IIssueQueryOptions);
 
-export const IssueController = {
+    res.status(200).json({
+      success: true,
+      data: result || [],
+    });
+  } catch (error) {}
+};
+
+export const issueController = {
   createIssue,
+  getALlIssues,
 };
