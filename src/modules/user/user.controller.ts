@@ -1,48 +1,48 @@
 import type { Request, Response } from "express";
 import { authService } from "./user.serviece";
+import sendResponse from "../../utils/sedResponse";
 
 const signupUser = async (req: Request, res: Response) => {
   try {
     const result = await authService.signupUserToDB(req.body);
 
-    res.status(201).json({
+    sendResponse(res, {
+      statusCode: 201,
       success: true,
       message: "User registered successfully",
       data: result,
     });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-      error: error,
-    });
+  } catch (error) {
+    if (error instanceof Error) {
+      sendResponse(res, {
+        statusCode: 500,
+        success: false,
+        message: error.message,
+        error: error,
+      });
+    }
   }
 };
 
 const loginUser = async (req: Request, res: Response) => {
   try {
-    const { token, user, refreshToken } = await authService.loginUserFromDB(
-      req.body,
-    );
+    const { token, user } = await authService.loginUserFromDB(req.body);
 
-    res.cookie("refreshToken", refreshToken, {
-      secure: false,
-      httpOnly: true,
-      sameSite: "lax",
-    });
-
-
-    res.status(200).json({
+    sendResponse(res, {
+      statusCode: 200,
       success: true,
       message: "Login successful",
       data: { token, user },
     });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-      error: error,
-    });
+  } catch (error) {
+    if (error instanceof Error) {
+      sendResponse(res, {
+        statusCode: 500,
+        success: false,
+        message: error.message,
+        error: error,
+      });
+    }
   }
 };
 

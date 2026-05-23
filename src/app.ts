@@ -5,12 +5,14 @@ import express, {
 } from "express";
 import { authRoute } from "./modules/user/user.route";
 import { issueRoute } from "./modules/issue/issue.route";
+import globalErrorHandler from "./middelware/globalErrorHandler";
 
 const app: Application = express();
 
 app.use(express.json());
 app.use(express.text());
 app.use(express.urlencoded({ extended: true }));
+app.use(globalErrorHandler);
 
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({

@@ -58,9 +58,6 @@ const loginUserFromDB = async (payload: ILogUser) => {
     expiresIn: "1d",
   });
 
-   const refreshToken = jwt.sign(jwtPayload, config.refresh_secrete as string, {
-    expiresIn: "10d",
-  });
 
   const user = {
     ...jwtPayload,
@@ -68,7 +65,7 @@ const loginUserFromDB = async (payload: ILogUser) => {
     updated_at: logUser.updated_at,
   };
 
-  return { token, user, refreshToken };
+  return { token, user };
 };
 
 export const authService = {

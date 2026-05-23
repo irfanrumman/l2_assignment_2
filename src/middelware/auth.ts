@@ -2,13 +2,15 @@ import type { NextFunction, Request, Response } from "express";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 import config from "../configaration";
 import { pool } from "../db";
+import sendResponse from "../utils/sedResponse";
 
 const authMiddelWare = (...roles: any) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const token = req.headers.authorization;
       if (!token) {
-        res.status(401).json({
+        sendResponse(res, {
+          statusCode: 401,
           success: false,
           message: "Unauthorized Access!!",
         });
@@ -28,27 +30,27 @@ const authMiddelWare = (...roles: any) => {
       );
 
       const user = userData.rows[0];
-      
 
       if (userData.rows.length === 0) {
-        res.status(404).json({
+        sendResponse(res, {
+          statusCode: 401,
           success: false,
           message: "Unauthorized!",
         });
       }
 
-
       if (!user.role) {
-        res.status(403).json({
-          success: "false",
+        sendResponse(res, {
+          statusCode: 403,
+          success: false,
           message: "User can not see issues!",
         });
       }
-      
 
-      if(!roles.includes(userData.rows[0].role)){
-        res.status(403).json({
-          success: "false",
+      if (!roles.includes(userData.rows[0].role)) {
+        sendResponse(res, {
+          statusCode: 403,
+          success: false,
           message: "Forbidden Access!",
         });
       }
