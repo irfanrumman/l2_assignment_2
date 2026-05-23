@@ -108,7 +108,46 @@ const getAllIssuesFromDB = async (payload: IIssueQueryOptions) => {
   return finalIssueFormat;
 };
 
+const getSingleIssueFromDB = async (payload: any) => {
+  const { id } = payload;
+
+  const issueData = await pool.query(
+    `
+    SELECT * FROM issues WHERE id=$1
+    `,
+    [id],
+  );
+
+  if (issueData.rows.length === 0) {
+    throw new Error("Issue Not Found!");
+  }
+
+  const issue = issueData.rows[0];
+  // const reporterId = issueData.rows[0].reporter_id;
+  const reporterId = issue.reporter_id;
+
+  const userResult = await pool.query(
+    `
+    SELECT id, name, role FROM users WHERE id=$1
+    `,
+    [reporterId],
+  );
+  const user = userResult.rows[0];
+  const finalIssueReult = {
+    id: issue.id,
+    title: issue.title,
+    description: issue.description,
+    type: issue.type,
+    status: issue.status,
+    reporter: user,
+    created_at: issue.created_at,
+    updated_at: issue.updated_at,
+  };
+
+  return finalIssueReult;
+};
 export const issueServiece = {
   createIssueToDB,
   getAllIssuesFromDB,
+  getSingleIssueFromDB,
 };

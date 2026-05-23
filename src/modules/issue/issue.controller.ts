@@ -24,11 +24,7 @@ const createIssue = async (req: Request, res: Response) => {
     });
   }
 };
-interface IReq {
-  sort?: string;
-  type?: string;
-  status?: string;
-}
+
 const getALlIssues = async (req: Request, res: Response) => {
   try {
     const { sort, type, status } = req.query;
@@ -45,7 +41,24 @@ const getALlIssues = async (req: Request, res: Response) => {
   } catch (error) {}
 };
 
+const getSingleIssue = async (req: Request, res: Response) => {
+  try {
+    const result = await issueServiece.getSingleIssueFromDB(req.params);
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      error: error,
+    });
+  }
+};
 export const issueController = {
   createIssue,
   getALlIssues,
+  getSingleIssue,
 };
