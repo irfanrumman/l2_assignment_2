@@ -123,7 +123,6 @@ const getSingleIssueFromDB = async (payload: any) => {
   }
 
   const issue = issueData.rows[0];
-  // const reporterId = issueData.rows[0].reporter_id;
   const reporterId = issue.reporter_id;
 
   const userResult = await pool.query(
@@ -146,8 +145,69 @@ const getSingleIssueFromDB = async (payload: any) => {
 
   return finalIssueReult;
 };
+
+const updateIssueIntoDB = async (
+  id: string,
+  userId: number,
+  userRole: string,
+  payload: any,
+) => {
+  const { title, description, type } = payload;
+
+  const issueSelect = await pool.query(
+    `
+      SELECT reporter_id, status FROM issues WHERE id = $1
+      `,
+    [id],
+  );
+
+  if (issueSelect.rows.length === 0) {
+    throw new Error("Issue not found");
+  }
+
+  const issue = issueSelect.rows[0];
+
+  if (userRole !== "maintainer") {
+    if (issue.reporter_id !== Number(userId)) {
+      throw new Error("You're unauthorized to update the issue");
+    }
+
+    if (issue.status !== "open") {
+      throw new Error("Contributors can only update issues with 'open' status");
+    }
+  }
+
+  if (title === undefined && description === undefined && type === undefined) {
+    throw new Error("Please provide at least one field to update");
+  }
+
+  const values = [
+    title !== undefined ? title : null,
+    description !== undefined ? description : null,
+    type !== undefined ? type : null,
+    id,
+  ];
+
+  const updatedResult = await pool.query(
+    `
+    UPDATE issues
+    SET title = COALESCE($1, title),
+    description = COALESCE($2, description),
+    type = COALESCE($3, type),
+    updated_at = NOW() 
+    WHERE id = $4
+    RETURNING *
+    `,
+    values,
+  );
+
+  const result = updatedResult.rows[0];
+
+  return result;
+};
 export const issueServiece = {
   createIssueToDB,
   getAllIssuesFromDB,
   getSingleIssueFromDB,
+  updateIssueIntoDB,
 };

@@ -3,7 +3,7 @@ import jwt, { type JwtPayload } from "jsonwebtoken";
 import config from "../configaration";
 import { pool } from "../db";
 
-const authUser = () => {
+const authMiddelWare = (...roles: any) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const token = req.headers.authorization;
@@ -28,16 +28,15 @@ const authUser = () => {
       );
 
       const user = userData.rows[0];
-      // console.log("user", user);
+      
 
       if (userData.rows.length === 0) {
         res.status(404).json({
           success: false,
-          message: "Not Found!",
+          message: "Unauthorized!",
         });
       }
 
-      // console.log("auth role:", user.role);
 
       if (!user.role) {
         res.status(403).json({
@@ -45,7 +44,14 @@ const authUser = () => {
           message: "User can not see issues!",
         });
       }
+      
 
+      if(!roles.includes(userData.rows[0].role)){
+        res.status(403).json({
+          success: "false",
+          message: "Forbidden Access!",
+        });
+      }
       req.user = decoded;
 
       next();
@@ -55,4 +61,4 @@ const authUser = () => {
   };
 };
 
-export default authUser;
+export default authMiddelWare;
