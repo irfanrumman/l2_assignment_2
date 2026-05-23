@@ -19,5 +19,10 @@ router.patch(
   authMiddelWare(authParamiter.contributor, authParamiter.maintainer),
   issueController.updateIssue,
 );
+router.delete(
+  "/:id",
+  authMiddelWare(authParamiter.maintainer),
+  issueController.removeIssue,
+);
 
 export const issueRoute = router;
