@@ -1,5 +1,6 @@
 import config from "../../configaration";
 import { pool } from "../../db";
+import AppError from "../../utils/appError";
 import type { ILogUser, IUser } from "./user.interface";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -17,7 +18,7 @@ const signupUserToDB = async (payload: IUser) => {
   );
 
   if (result.rows.length === 0) {
-    throw new Error("User not created");
+    throw new AppError(404,"User not created");
   }
 
   delete result.rows[0].password;
@@ -35,14 +36,14 @@ const loginUserFromDB = async (payload: ILogUser) => {
   );
 
   if (userData.rows.length === 0) {
-    throw new Error("Wrong Email!");
+    throw new AppError(400,"Wrong Email!");
   }
 
   const logUser = userData.rows[0];
   const matchPassword = await bcrypt.compare(password, logUser.password);
 
   if (!matchPassword) {
-    throw new Error("Wrong Password");
+    throw new AppError(400,"Wrong Password");
   }
 
   // Generate jwt_token

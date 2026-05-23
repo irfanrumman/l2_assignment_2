@@ -1,4 +1,5 @@
 import { pool } from "../../db";
+import AppError from "../../utils/appError";
 import type { ICreateIssue, IIssueQueryOptions } from "./issue.interface";
 
 const createIssueToDB = async (payload: ICreateIssue) => {
@@ -12,7 +13,7 @@ const createIssueToDB = async (payload: ICreateIssue) => {
   );
 
   if (user.rows.length === 0) {
-    throw new Error("User Not Exists");
+    throw new AppError(404, "User Not Exists");
   }
 
   const insetIssueIntoDB = await pool.query(
@@ -22,7 +23,7 @@ const createIssueToDB = async (payload: ICreateIssue) => {
     [title, description, type, status, reporter_id],
   );
   if (!insetIssueIntoDB.rows || insetIssueIntoDB.rows.length === 0) {
-    throw new Error("Issue Creation Failed");
+    throw new AppError(400, "Issue Creation Failed");
   }
   const result = insetIssueIntoDB.rows[0];
 
@@ -104,7 +105,7 @@ const getSingleIssueFromDB = async (id: string) => {
   );
 
   if (issueData.rows.length === 0) {
-    throw new Error("Issue Not Found!");
+    throw new AppError(404, "Issue Not Found!");
   }
 
   const issue = issueData.rows[0];
@@ -137,39 +138,48 @@ const updateIssueIntoDB = async (
   userRole: string,
   payload: any,
 ) => {
-  const { title, description, type } = payload;
+  const { title, description, type, status } = payload;
 
   const issueSelect = await pool.query(
-    `
-      SELECT reporter_id, status FROM issues WHERE id = $1
-      `,
+    `SELECT reporter_id, status FROM issues WHERE id = $1`,
     [id],
   );
 
   if (issueSelect.rows.length === 0) {
-    throw new Error("Issue not found");
+    throw new AppError(404, "Issue not found");
   }
 
   const issue = issueSelect.rows[0];
 
   if (userRole !== "maintainer") {
     if (issue.reporter_id !== Number(userId)) {
-      throw new Error("You're unauthorized to update the issue");
+      throw new AppError(403, "You're unauthorized to update the issue");
     }
-
     if (issue.status !== "open") {
-      throw new Error("Contributors can only update issues with 'open' status");
+      throw new AppError(
+        403,
+        "Contributors can only update issues with 'open' status",
+      );
+    }
+    if (status !== undefined) {
+      throw new AppError(403, "Contributors cannot change issue status");
     }
   }
 
-  if (title === undefined && description === undefined && type === undefined) {
-    throw new Error("Please provide at least one field to update");
+  if (
+    title === undefined &&
+    description === undefined &&
+    type === undefined &&
+    status === undefined
+  ) {
+    throw new AppError(400, "Please provide at least one field to update");
   }
 
   const values = [
     title !== undefined ? title : null,
     description !== undefined ? description : null,
     type !== undefined ? type : null,
+    status !== undefined ? status : null,
     id,
   ];
 
@@ -177,33 +187,27 @@ const updateIssueIntoDB = async (
     `
     UPDATE issues
     SET title = COALESCE($1, title),
-    description = COALESCE($2, description),
-    type = COALESCE($3, type),
-    updated_at = NOW() 
-    WHERE id = $4
+        description = COALESCE($2, description),
+        type = COALESCE($3, type),
+        status = COALESCE($4, status),
+        updated_at = NOW()
+    WHERE id = $5
     RETURNING *
     `,
     values,
   );
-
   const result = updatedResult.rows[0];
-
   return result;
 };
-
 const deleteIssueFromDB = async (id: string) => {
-
   const checkIssue = await pool.query(`SELECT id FROM issues WHERE id = $1`, [
     id,
   ]);
   if (checkIssue.rows.length === 0) {
-    throw new Error("Issue not found");
+    throw new AppError(404, "Issue not found");
   }
 
-  await pool.query(
-    `DELETE FROM issues WHERE id = $1`,
-    [id]
-  );
+  await pool.query(`DELETE FROM issues WHERE id = $1`, [id]);
 };
 export const issueServiece = {
   createIssueToDB,

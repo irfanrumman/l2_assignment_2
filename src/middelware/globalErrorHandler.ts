@@ -6,7 +6,7 @@ const globalErrorHandler = (
   res: Response,
   next: NextFunction,
 ) => {
-  let statusCode = err.status || 500;
+  let statusCode = err.statusCode || err.status || 500;
   let message = err.message || "Internal Server Error";
 
   if (err.name === "ValidationError") {
@@ -14,9 +14,13 @@ const globalErrorHandler = (
     message = "Invalid data provided";
   }
 
+   console.log("error name:", err.name);
+  console.log("err.statusCode:", err.statusCode);
+  console.log("err.message:", err.message);
+  
   res.status(statusCode).json({
     success: false,
-    error: message,
+    message: message,
   });
 };
 

@@ -5,7 +5,7 @@ A collaborative backend platform for software teams to report bugs, suggest feat
 ## Live URL
 
 ```
-https://your-deployment-url.vercel.app
+https://devpulssecondassignment.vercel.app/
 ```
 
 ---
@@ -43,8 +43,8 @@ https://your-deployment-url.vercel.app
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/devpulse.git
-cd devpulse
+git clone https://github.com/irfanrumman/l2_assignment_2.git
+cd l2_assignment_2
 ```
 
 ### 2. Install dependencies

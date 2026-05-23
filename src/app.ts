@@ -16,8 +16,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({
-    message: "Assignment_2",
-    author: "Irfan",
+    success: true,
+    message: "Welcome To The Our Team!",
   });
 });
 

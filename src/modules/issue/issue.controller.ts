@@ -1,9 +1,10 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { issueServiece } from "./issue.serviece";
 import type { IIssueQueryOptions } from "./issue.interface";
 import sendResponse from "../../utils/sedResponse";
 
-const createIssue = async (req: Request, res: Response) => {
+
+const createIssue = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const reporter_id = req.user?.id;
 
@@ -19,18 +20,15 @@ const createIssue = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (error) {
-    if (error instanceof Error) {
-      sendResponse(res, {
-        statusCode: 500,
-        success: false,
-        message: error.message,
-        error: error,
-      });
-    }
+    next(error);
   }
 };
 
-const getALlIssues = async (req: Request, res: Response) => {
+const getALlIssues = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { sort, type, status } = req.query;
     const result = await issueServiece.getAllIssuesFromDB({
@@ -45,18 +43,15 @@ const getALlIssues = async (req: Request, res: Response) => {
       data: result || [],
     });
   } catch (error) {
-    if (error instanceof Error) {
-      sendResponse(res, {
-        statusCode: 500,
-        success: false,
-        message: error.message,
-        error: error,
-      });
-    }
+    next(error);
   }
 };
 
-const getSingleIssue = async (req: Request, res: Response) => {
+const getSingleIssue = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { id } = req.params;
     const result = await issueServiece.getSingleIssueFromDB(id as string);
@@ -67,18 +62,11 @@ const getSingleIssue = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (error) {
-    if (error instanceof Error) {
-      sendResponse(res, {
-        statusCode: 500,
-        success: false,
-        message: error.message,
-        error: error,
-      });
-    }
+    next(error);
   }
 };
 
-const updateIssue = async (req: Request, res: Response) => {
+const updateIssue = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     const userId = req.user?.id;
@@ -97,36 +85,22 @@ const updateIssue = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (error) {
-    if (error instanceof Error) {
-      sendResponse(res, {
-        statusCode: 500,
-        success: false,
-        message: error.message,
-        error: error,
-      });
-    }
+    next(error);
   }
 };
 
-const removeIssue = async (req: Request, res: Response) => {
+const removeIssue = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     await issueServiece.deleteIssueFromDB(id as string);
 
     sendResponse(res, {
-      statusCode: 200,
+      statusCode: 204,
       success: true,
       message: "Issue deleted successfully",
     });
   } catch (error) {
-    if (error instanceof Error) {
-      sendResponse(res, {
-        statusCode: 500,
-        success: false,
-        message: error.message,
-        error: error,
-      });
-    }
+    next(error);
   }
 };
 

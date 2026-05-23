@@ -1,8 +1,8 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { authService } from "./user.serviece";
 import sendResponse from "../../utils/sedResponse";
 
-const signupUser = async (req: Request, res: Response) => {
+const signupUser = async (req: Request, res: Response, next:NextFunction) => {
   try {
     const result = await authService.signupUserToDB(req.body);
 
@@ -13,18 +13,11 @@ const signupUser = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (error) {
-    if (error instanceof Error) {
-      sendResponse(res, {
-        statusCode: 500,
-        success: false,
-        message: error.message,
-        error: error,
-      });
-    }
+  next(error)
   }
 };
 
-const loginUser = async (req: Request, res: Response) => {
+const loginUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { token, user } = await authService.loginUserFromDB(req.body);
 
@@ -35,14 +28,7 @@ const loginUser = async (req: Request, res: Response) => {
       data: { token, user },
     });
   } catch (error) {
-    if (error instanceof Error) {
-      sendResponse(res, {
-        statusCode: 500,
-        success: false,
-        message: error.message,
-        error: error,
-      });
-    }
+   next(error)
   }
 };
 
